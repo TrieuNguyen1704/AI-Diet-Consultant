@@ -1,56 +1,100 @@
 <template>
   <div class="donation-container">
-    <h2>QUẢN LÝ HIẾN MÁU & TÌNH TRẠNG MÁU</h2>
+    <h2>QUẢN LÝ KHO MÁU & ĐĂNG KÝ HIẾN MÁU</h2>
     
-    <div class="blood-status">
-      <h3>Kho máu hiện tại:</h3>
-      <ul>
-        <li>Nhóm O: 🌟 Sẵn sàng</li>
-        <li>Nhóm A: ⚠️ Đang khan hiếm</li>
-        <li>Nhóm B: 🌟 Sẵn sàng</li>
-        <li>Nhóm AB: ⚠️ Đang khan hiếm</li>
-      </ul>
+    <div class="blood-stock-section">
+      <h3>🩸 Trạng thái kho máu thời gian thực (Cập nhật từ Bệnh viện)</h3>
+      <div class="stock-grid">
+        <div v-for="blood in bloodStock" :key="blood.type" class="stock-item">
+          <span class="blood-type">Nhóm máu {{ blood.type }}:</span>
+          <span class="blood-status">{{ blood.status }}</span>
+        </div>
+      </div>
     </div>
 
-    <hr />
+    <hr class="divider" />
 
-    <h3>Đăng ký hiến máu cứu người</h3>
-    <form @submit.prevent="handleDonate">
-      <div class="form-group">
-        <label>Nhóm máu của anh:</label>
-        <select v-model="bloodType">
-          <option value="O">Nhóm O</option>
-          <option value="A">Nhóm A</option>
-          <option value="B">Nhóm B</option>
-          <option value="AB">Nhóm AB</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Ngày hẹn hiến máu:</label>
-        <input type="date" v-model="donationDate" required />
-      </div>
-      <button type="submit" class="btn-submit">Gửi lịch đăng ký</button>
-    </form>
+    <div class="booking-section">
+      <h3>📅 Đăng ký lịch hẹn hiến máu nhân đạo</h3>
+      <form @submit.prevent="handleRegisterDonation">
+        <div class="form-group">
+          <label>Chọn nhóm máu của anh/chị:</label>
+          <select v-model="selectedBloodType" required>
+            <option value="O">Nhóm máu O</option>
+            <option value="A">Nhóm máu A</option>
+            <option value="B">Nhóm máu B</option>
+            <option value="AB">Nhóm máu AB</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Chọn ngày hẹn đăng ký:</label>
+          <input type="date" v-model="donationDate" :min="today" required />
+        </div>
+
+        <button type="submit" class="btn-submit">Xác nhận đặt lịch hẹn</button>
+      </form>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-const bloodType = ref('O')
+const bloodStock = ref([])
+const selectedBloodType = ref('O')
 const donationDate = ref('')
+const today = new Date().toISOString().split('T')[0] // Chặn không cho chọn ngày quá khứ
 
-const handleDonate = () => {
-  alert(`Đăng ký hiến máu nhóm ${bloodType.value} vào ngày ${donationDate.value} thành công!`)
+// 1. Tự động lấy dữ liệu kho máu từ External System khi vừa mở trang lên
+const fetchBloodStock = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const response = await axios.get('http://127.0.0.1:8000/api/blood-availability', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    bloodStock.value = response.data
+  } catch (error) {
+    console.error('Không lấy được dữ liệu kho máu rồi anh ơi!', error)
+  }
 }
+
+// 2. Xử lý gửi form đăng ký lịch hẹn hiến máu lên Database
+const handleRegisterDonation = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const response = await axios.post('http://127.0.0.1:8000/api/donate-blood', {
+      blood_type: selectedBloodType.value,
+      donation_date: donationDate.value
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    alert(response.data.message) // Bật thông báo đặt lịch thành công
+    donationDate.value = '' // Reset lại ô chọn ngày
+  } catch (error) {
+    alert('Đăng ký thất bại, anh vui lòng kiểm tra lại kết nối nhé!')
+  }
+}
+
+// Chạy hàm lấy dữ liệu kho máu ngay khi component được nạp
+onMounted(() => {
+  fetchBloodStock()
+})
 </script>
 
 <style scoped>
-.donation-container { max-width: 500px; margin: 50px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-.blood-status ul { list-style: none; padding: 0; display: flex; justify-content: space-between; }
-.blood-status li { padding: 5px 10px; background: #f1f2f6; border-radius: 4px; font-size: 14px; }
-.form-group { margin: 15px 0; }
-.form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-.form-group select, .form-group input { width: 100%; padding: 8px; box-sizing: border-box; }
-.btn-submit { width: 100%; padding: 10px; background-color: #ff4757; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+.donation-container { max-width: 600px; margin: 40px auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+h2 { text-align: center; color: #e53e3e; margin-bottom: 25px; font-size: 20px; font-weight: bold; }
+h3 { color: #2d3748; font-size: 16px; margin-bottom: 15px; font-weight: 600; }
+.stock-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+.stock-item { padding: 12px; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 8px; display: flex; justify-content: space-between; }
+.blood-type { font-weight: bold; color: #c53030; }
+.divider { margin: 25px 0; border: 0; border-top: 1px dashed #cbd5e0; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; margin-bottom: 6px; font-weight: bold; color: #4a5568; }
+.form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; }
+.btn-submit { width: 100%; padding: 12px; background-color: #e53e3e; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+.btn-submit:hover { background-color: #9b2c2c; }
 </style>
