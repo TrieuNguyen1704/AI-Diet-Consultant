@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\DietModule;
+use App\Http\Controllers\Controller; // <-- QUAN TRỌNG: Thêm dòng này để kế thừa gốc
 use Illuminate\Http\Request;
 use App\Models\DietPlan;
 
