@@ -1,14 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-// Import các trang rời rạc
-import LoginView from '../views/LoginView.vue'
-import RegisterView from '../views/RegisterView.vue'
+// ==========================================
+// ĐƯỜNG DẪN MỚI: IMPORT THEO DẠNG MODULE-BASED
+// ==========================================
+import LoginView from '../components/LoginModule/index.vue'
+import RegisterView from '../components/RegisterModule/index.vue'
+import MetricsView from '../components/MetricsModule/index.vue'
+import DietPlanView from '../components/DietPlanModule/index.vue'
+import DonationView from '../components/DonationModule/index.vue'
 
-// Import Layout và các trang hệ thống
+// Import Layout dùng chung
 import MainLayout from '../layouts/MainLayout.vue'
-import MetricsView from '../views/MetricsView.vue'
-import DietPlanView from '../views/DietPlanView.vue' // Mở comment nếu anh đã tạo file này
-import DonationView from '../views/DonationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,13 +37,11 @@ const router = createRouter({
           name: 'metrics',
           component: MetricsView
         },
-
         {
           path: '/diet-plan',
           name: 'diet-plan',
           component: DietPlanView
         },
-        
         {
           path: '/donation',
           name: 'donation',

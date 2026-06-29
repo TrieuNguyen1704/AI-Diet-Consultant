@@ -11,6 +11,7 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
+        open: false, // Ép Vite KHÔNG tự động kích hoạt mở trình duyệt lung tung
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },
