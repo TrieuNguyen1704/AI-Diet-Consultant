@@ -5,7 +5,6 @@
     <div v-if="loading" class="loading-msg">Đang phân tích chỉ số để lên thực đơn cho anh...</div>
     
     <div v-else-if="plan" class="plan-content">
-      <!-- Khối 1: Thực đơn nội bộ -->
       <div class="plan-card primary">
         <h3>🥗 Thực đơn chính (Hệ thống đề xuất)</h3>
         <p>{{ plan.primary_plan }}</p>
@@ -16,12 +15,11 @@
         <div v-else class="badge-success">✅ Anh đã duyệt thực đơn chính</div>
       </div>
 
-      <!-- Khối 2: Thực đơn External System (Chuẩn bị cho tính năng AI) -->
       <div class="plan-card alternative">
         <h3>🤖 Thực đơn thay thế (Gợi ý từ AI Gemini)</h3>
         <p>{{ plan.alternative_plan }}</p>
-        <button class="btn-ai" @click="requestAiAlternative">
-          Yêu cầu AI đổi món khác
+        <button class="btn-ai" @click="requestAiAlternative" :disabled="aiLoading">
+          {{ aiLoading ? 'AI đang suy nghĩ món mới...' : 'Yêu cầu AI đổi món khác' }}
         </button>
       </div>
     </div>
@@ -38,13 +36,14 @@ import axios from 'axios'
 
 const plan = ref(null)
 const loading = ref(true)
+const aiLoading = ref(false) // Trạng thái đợi AI đổi món
 
-// Hàm gọi API lấy thực đơn
+// Hàm gọi API lấy thực đơn mới nhất từ DB
 const fetchPlan = async () => {
   try {
     const token = localStorage.getItem('token')
     const response = await axios.get('http://127.0.0.1:8000/api/diet-plan', {
-      headers: { Authorization: `Bearer ${token}` } // Phải có token mới qua được cổng Sanctum
+      headers: { Authorization: `Bearer ${token}` }
     })
     plan.value = response.data
   } catch (error) {
@@ -68,9 +67,26 @@ const acceptPlan = async () => {
   }
 }
 
-// Hàm chờ làm cho tính năng gọi AI (sẽ xử lý sau)
-const requestAiAlternative = () => {
-  alert('Tính năng kết nối API Gemini AI đang được xây dựng!')
+// HÀM XỊN: Gọi Backend kích hoạt AI Gemini tính toán đổi món khác cho anh
+const requestAiAlternative = async () => {
+  try {
+    aiLoading.value = true
+    const token = localStorage.getItem('token')
+    
+    // Gọi route /diet-plan/alternative mà anh em mình đã khai báo trong api.php
+    const response = await axios.get('http://127.0.0.1:8000/api/diet-plan/alternative', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    
+    // Cập nhật lại nội dung thực đơn AI mới ngay trên màn hình
+    plan.value.alternative_plan = response.data.alternative_plan
+    alert('Gemini AI đã đổi món mới thành công cho anh rồi nhé!')
+  } catch (error) {
+    console.error('Lỗi đổi món AI:', error)
+    alert('Không kết nối được với AI lúc này, anh thử lại sau nhé!')
+  } finally {
+    aiLoading.value = false
+  }
 }
 
 // Lấy dữ liệu ngay khi mở trang
@@ -91,6 +107,7 @@ p { font-size: 16px; line-height: 1.6; color: #4a5568; white-space: pre-line; }
 .btn-accept:hover { background-color: #38a169; }
 .btn-ai { background-color: #3182ce; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
 .btn-ai:hover { background-color: #2b6cb0; }
+.btn-ai:disabled { background-color: #a0aec0; cursor: not-allowed; } /* Style khi nút bị vô hiệu hóa lúc đợi AI */
 .badge-success { color: #276749; font-weight: bold; margin-top: 10px; }
 .loading-msg, .error-msg { text-align: center; font-size: 18px; color: #e53e3e; }
 </style>
