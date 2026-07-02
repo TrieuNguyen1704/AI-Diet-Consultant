@@ -90,7 +90,7 @@ const handleSubmit = async () => {
   try {
     loading.value = true
     const token = localStorage.getItem('token')
-    await axios.post('http://127.0.0.1:8000/api/body-metrics', {
+    await axios.post('http://127.0.0.1:8000/api/metrics', {
       body_type: body_type.value,
       height: height.value,
       weight: weight.value,
