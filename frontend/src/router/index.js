@@ -8,6 +8,7 @@ import RegisterView from '../components/RegisterModule/index.vue'
 import MetricsView from '../components/MetricsModule/index.vue'
 import DietPlanView from '../components/DietPlanModule/index.vue'
 import DonationView from '../components/DonationModule/index.vue'
+import ForgotPassword from '../components/LoginModule/ForgotPassword.vue'
 
 // Import Layout dùng chung
 import MainLayout from '../layouts/MainLayout.vue'
@@ -20,6 +21,12 @@ const router = createRouter({
       path: '/',
       name: 'login',
       component: LoginView
+    },
+    // 2. Chèn thêm Route cấu hình chuẩn cho trang Quên mật khẩu vào mảng này:
+    {
+      path: '/forgot-password',
+      name: 'ForgotPassword',
+      component: ForgotPassword
     },
     {
       path: '/register',

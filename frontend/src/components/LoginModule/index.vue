@@ -12,7 +12,15 @@
       </div>
       <button type="submit">Đăng nhập ngay</button>
     </form>
-  </div>
+
+    <div class="auth-navigation">
+      <a href="#" @click.prevent="goToForgotPassword" class="nav-link">Quên mật khẩu?</a>
+      <p class="register-text">
+        Chưa có tài khoản? 
+        <a href="#" @click.prevent="goToRegister" class="nav-link register-link">Đăng ký ngay</a>
+      </p>
+    </div>
+    </div>
 </template>
 
 <script setup>
@@ -47,6 +55,16 @@ const handleLogin = async () => {
     }
   }
 }
+
+// ====== HÀM ĐIỀU HƯỚNG SANG TRANG ĐĂNG KÝ VÀ QUÊN MẬT KHẨU ======
+const goToRegister = () => {
+  router.push('/register')
+}
+
+const goToForgotPassword = () => {
+  router.push('/forgot-password')
+}
+// ===============================================================
 </script>
 
 <style scoped>
@@ -103,9 +121,42 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: background 0.2s;
+  margin-bottom: 10px; /* Thêm chút khoảng cách dưới nút bấm */
 }
 
 button:hover {
   background-color: #3498db;
 }
+
+/* ====== CSS MỚI CHO PHẦN LIÊN KẾT ĐIỀU HƯỚNG MỚI THÊM VÀO ====== */
+.auth-navigation {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.nav-link {
+  color: #7f8c8d;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: #4bc0c0;
+  text-decoration: underline;
+}
+
+.register-text {
+  color: #4a5568;
+  margin: 0;
+}
+
+.register-link {
+  color: #4bc0c0;
+  font-weight: bold;
+}
+/* ============================================================== */
 </style>
